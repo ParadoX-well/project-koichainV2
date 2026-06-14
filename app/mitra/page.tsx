@@ -289,7 +289,7 @@ export default function MitraCatalog() {
             <div className="bg-gray-900 text-white py-16 mt-auto">
                 <div className="max-w-4xl mx-auto px-4 text-center">
                     <h2 className="text-3xl font-black mb-4">Punya Usaha Budidaya atau Toko Koi?</h2>
-                    <p className="text-gray-400 mb-8 max-w-2xl mx-auto">Tingkatkan kepercayaan pembeli Anda dengan mendaftarkan koleksi ikan Anda ke Blockchain KoiChain. Dapatkan lencana verifikasi dan tampil di direktori ini.</p>
+                    <p className="text-gray-400 mb-8 max-w-2xl mx-auto">Tingkatkan kepercayaan pembeli Anda dengan mendaftarkan koleksi ikan Anda ke Blockchain KoiChain. Dapatkan lencana verifikasi dan tampil di peta ini.</p>
                     <Link href="/login" className="inline-block bg-orange-600 hover:bg-orange-500 text-white px-8 py-4 rounded-full font-black text-lg transition shadow-lg shadow-orange-600/30">
                         Daftar Sebagai Mitra
                     </Link>

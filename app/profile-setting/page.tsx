@@ -11,6 +11,7 @@ import {
 import Link from 'next/link';
 import toast, { Toaster } from 'react-hot-toast';
 import Navbar from '@/components/Navbar';
+import MapWrapper from '@/components/MapWrapper';
 
 const ROLE_CONFIG: Record<string, { label: string; color: string; bg: string; gradient: string }> = {
   admin:   { label: 'Admin',   color: 'text-red-700',    bg: 'bg-red-100 border-red-200',    gradient: 'from-red-500 to-red-700' },
@@ -45,6 +46,8 @@ export default function ProfileSetting() {
     contactEmail: '',
     storeDescription: '',
     instagram: '',
+    latitude: null as number | null,
+    longitude: null as number | null,
   });
   const [draft, setDraft] = useState({ fullName: '', phone: '', address: '' });
   const [storeDraft, setStoreDraft] = useState({
@@ -54,6 +57,8 @@ export default function ProfileSetting() {
     contactEmail: '',
     storeDescription: '',
     instagram: '',
+    latitude: null as number | null,
+    longitude: null as number | null,
   });
   const [savingStore, setSavingStore] = useState(false);
   const [userWallets, setUserWallets] = useState<any[]>([]);
@@ -92,6 +97,8 @@ export default function ProfileSetting() {
           contactEmail: p.contact_email || '',
           storeDescription: p.store_description || '',
           instagram: p.instagram || '',
+          latitude: p.latitude || null,
+          longitude: p.longitude || null,
         };
         setProfile(data);
         setDraft({ fullName: data.fullName, phone: data.phone, address: data.address });
@@ -102,6 +109,8 @@ export default function ProfileSetting() {
           contactEmail: data.contactEmail,
           storeDescription: data.storeDescription,
           instagram: data.instagram,
+          latitude: data.latitude,
+          longitude: data.longitude,
         });
 
         const { data: wals } = await supabase.from('user_wallets').select('*').eq('user_id', authUser.id).order('created_at', { ascending: true });
@@ -111,6 +120,20 @@ export default function ProfileSetting() {
     }
     getData();
   }, [authUser]);
+
+  const handleMapPositionChange = async (lat: number, lng: number) => {
+    setStoreDraft(prev => ({ ...prev, latitude: lat, longitude: lng }));
+    try {
+        const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`);
+        const data = await res.json();
+        if (data && data.display_name) {
+            setStoreDraft(prev => ({ ...prev, storeAddress: data.display_name }));
+            toast.success("Alamat otomatis terisi dari peta!");
+        }
+    } catch (e) {
+        console.error("Geocoding failed", e);
+    }
+  };
 
   const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -208,6 +231,8 @@ export default function ProfileSetting() {
         contact_email: storeDraft.contactEmail,
         store_description: storeDraft.storeDescription,
         instagram: storeDraft.instagram,
+        latitude: storeDraft.latitude,
+        longitude: storeDraft.longitude,
         updated_at: new Date(),
       }).eq('id', userId);
       if (error) throw error;
@@ -316,7 +341,7 @@ export default function ProfileSetting() {
                 <div className="relative w-24 h-24 mx-auto mb-4 group">
                   <div className="w-full h-full rounded-full overflow-hidden border-4 border-white shadow-lg bg-gray-100">
                     {profile.avatarUrl
-                      ? <img src={profile.avatarUrl} className="w-full h-full object-cover" alt="Avatar" />
+                      ? <img src={profile.avatarUrl} className="w-full h-full object-cover" alt="Avatar" referrerPolicy="no-referrer" />
                       : <div className="w-full h-full flex items-center justify-center text-gray-300"><User size={40} /></div>
                     }
                   </div>
@@ -569,6 +594,38 @@ export default function ProfileSetting() {
                       </div>
                     </div>
 
+                    {/* Peta Lokasi Toko */}
+                    <div className="col-span-2">
+                      <label className="block text-sm font-bold text-gray-700 mb-2">Koordinat Peta (Geser pin untuk menandai lokasi)</label>
+                      <div className="h-64 w-full relative rounded-xl overflow-hidden border border-gray-200 shadow-sm">
+                        <MapWrapper 
+                          position={storeDraft.latitude && storeDraft.longitude ? [storeDraft.latitude, storeDraft.longitude] : null}
+                          onPositionChange={(pos) => handleMapPositionChange(pos[0], pos[1])}
+                        />
+                      </div>
+                      <div className="flex gap-2 mt-2 items-center justify-between">
+                          <p className="text-xs text-gray-500">Peta ini akan muncul di Halaman Profil Toko Anda dan Peta Mitra Global.</p>
+                          <button 
+                              type="button"
+                              onClick={() => {
+                                  if(navigator.geolocation) {
+                                      navigator.geolocation.getCurrentPosition((pos) => {
+                                          handleMapPositionChange(pos.coords.latitude, pos.coords.longitude);
+                                          toast.success("Lokasi GPS ditemukan!");
+                                      }, () => {
+                                          toast.error("Gagal mendapatkan lokasi GPS.");
+                                      });
+                                  } else {
+                                      toast.error("Browser Anda tidak mendukung GPS.");
+                                  }
+                              }}
+                              className="text-xs bg-orange-100 hover:bg-orange-200 text-orange-700 px-3 py-1.5 rounded-lg font-bold transition"
+                          >
+                              Gunakan GPS Saat Ini
+                          </button>
+                      </div>
+                    </div>
+
                     {/* Deskripsi Toko */}
                     <div className="col-span-2">
                       <label className="block text-sm font-bold text-gray-700 mb-2">Deskripsi Toko</label>
@@ -585,7 +642,7 @@ export default function ProfileSetting() {
 
                 {/* Footer Aksi Data Toko */}
                 <div className="px-6 py-4 border-t border-gray-100 flex items-center justify-between bg-gray-50">
-                  <p className="text-xs text-gray-400">Data toko akan ditampilkan di profil publik dan direktori mitra.</p>
+                  <p className="text-xs text-gray-400">Data toko akan ditampilkan di profil publik dan peta mitra.</p>
                   <button
                     type="submit"
                     disabled={savingStore}

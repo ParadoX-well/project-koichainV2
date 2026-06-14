@@ -9,6 +9,7 @@ import Link from 'next/link';
 import toast, { Toaster } from 'react-hot-toast';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useRequireAuth } from '@/hooks/useRequireAuth';
+import MapWrapper from '@/components/MapWrapper';
 
 function VerificationContent() {
     const router = useRouter();
@@ -30,7 +31,9 @@ function VerificationContent() {
         storeDescription: '',
         contactEmail: '',
         contactPhone: '',
-        instagram: ''
+        instagram: '',
+        latitude: null as number | null,
+        longitude: null as number | null
     });
 
     const [ktpFile, setKtpFile] = useState<File | null>(null);
@@ -60,7 +63,9 @@ function VerificationContent() {
                     storeDescription: data.store_description || '',
                     contactEmail: data.contact_email || authUser.email || '',
                     contactPhone: data.contact_phone || '',
-                    instagram: data.instagram || ''
+                    instagram: data.instagram || '',
+                    latitude: data.latitude || null,
+                    longitude: data.longitude || null
                 }));
 
                 // Jika datang dari popup landing page dengan ?upgrade=seller/breeder,
@@ -91,6 +96,20 @@ function VerificationContent() {
         setKtpFile(null);
         setKtpSelfieFile(null);
         setFarmPhotoFile(null);
+    };
+
+    const handleMapPositionChange = async (lat: number, lng: number) => {
+        setFormData(prev => ({ ...prev, latitude: lat, longitude: lng }));
+        try {
+            const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`);
+            const data = await res.json();
+            if (data && data.display_name) {
+                setFormData(prev => ({ ...prev, storeAddress: data.display_name }));
+                toast.success("Alamat otomatis terisi dari peta!");
+            }
+        } catch (e) {
+            console.error("Geocoding failed", e);
+        }
     };
 
     // Upload Document Helper
@@ -140,6 +159,8 @@ function VerificationContent() {
                 contact_email: formData.contactEmail,
                 contact_phone: formData.contactPhone,
                 instagram: formData.instagram,
+                latitude: formData.latitude,
+                longitude: formData.longitude,
                 ktp_url: ktpUrl,
                 ktp_selfie_url: ktpSelfieUrl,
                 farm_photo_url: farmPhotoUrl,
@@ -429,6 +450,36 @@ function VerificationContent() {
                                         <div className="relative">
                                             <MapPin className="absolute left-4 top-4 text-gray-400 w-5 h-5" />
                                             <textarea required rows={2} value={formData.storeAddress} onChange={(e) => setFormData({ ...formData, storeAddress: e.target.value })} className="w-full pl-12 pr-4 py-3.5 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-orange-500 focus:bg-white focus:border-orange-200 transition-all outline-none resize-none" placeholder="Alamat lengkap..." />
+                                        </div>
+                                    </div>
+                                    <div className="col-span-2">
+                                        <label className="block text-sm font-bold text-gray-700 mb-2">Koordinat Lokasi Toko/Farm di Peta (Sangat Disarankan) <span className="text-orange-500 text-xs font-normal ml-2">Geser pin untuk menandai lokasi persis</span></label>
+                                        <div className="h-72 w-full relative rounded-xl overflow-hidden border border-gray-200 shadow-sm">
+                                            <MapWrapper 
+                                                position={formData.latitude && formData.longitude ? [formData.latitude, formData.longitude] : null}
+                                                onPositionChange={(pos) => handleMapPositionChange(pos[0], pos[1])}
+                                            />
+                                        </div>
+                                        <div className="flex gap-2 mt-2 items-center justify-between">
+                                            <p className="text-xs text-gray-500">Peta ini akan muncul di Halaman Profil Toko Anda dan Peta Mitra Global.</p>
+                                            <button 
+                                                type="button"
+                                                onClick={() => {
+                                                    if(navigator.geolocation) {
+                                                        navigator.geolocation.getCurrentPosition((pos) => {
+                                                            handleMapPositionChange(pos.coords.latitude, pos.coords.longitude);
+                                                            toast.success("Lokasi GPS ditemukan!");
+                                                        }, () => {
+                                                            toast.error("Gagal mendapatkan lokasi GPS.");
+                                                        });
+                                                    } else {
+                                                        toast.error("Browser Anda tidak mendukung GPS.");
+                                                    }
+                                                }}
+                                                className="text-xs bg-orange-100 hover:bg-orange-200 text-orange-700 px-3 py-1.5 rounded-lg font-bold transition"
+                                            >
+                                                Gunakan GPS Saat Ini
+                                            </button>
                                         </div>
                                     </div>
                                     <div className="col-span-2">

@@ -189,7 +189,14 @@ export default function PublicProfilePage({ params }: { params: Promise<{ id: st
                                                 <span className="hidden md:inline text-gray-300">•</span>
                                                 <div className="flex items-start md:items-center gap-1.5">
                                                     <MapPin size={16} className="flex-shrink-0 mt-0.5 md:mt-0 text-gray-400" />
-                                                    <span>{isMitra && profile.store_address ? profile.store_address : profile.address}</span>
+                                                    <a 
+                                                        href={profile.latitude && profile.longitude ? `https://www.google.com/maps/search/?api=1&query=${profile.latitude},${profile.longitude}` : `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(isMitra && profile.store_address ? profile.store_address : profile.address)}`} 
+                                                        target="_blank" 
+                                                        rel="noreferrer" 
+                                                        className="hover:text-orange-500 hover:underline transition-colors"
+                                                    >
+                                                        {isMitra && profile.store_address ? profile.store_address : profile.address}
+                                                    </a>
                                                 </div>
                                             </>
                                         )}

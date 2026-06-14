@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react';
 import Link from "next/link";
-import { User, ShieldCheck, Wallet, XCircle, LayoutDashboard, LogOut, ChevronDown, Settings, Bell, CheckCircle, RefreshCw, X, Store } from "lucide-react";
+import { User, ShieldCheck, Wallet, XCircle, LayoutDashboard, LogOut, ChevronDown, Settings, Bell, CheckCircle, RefreshCw, X, Store, MapPin } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 import { useWallet } from '@/context/WalletContext';
 import { useRouter } from 'next/navigation';
@@ -163,7 +163,9 @@ export default function Navbar() {
                 </span>
             </Link>
 
-            {/* DESKTOP NAV LINKS DIHAPUS SESUAI PERMINTAAN */}
+            {/* DESKTOP NAV LINKS */}
+            <div className="hidden md:flex flex-1 justify-center">
+            </div>
 
             <div className="flex items-center gap-2 sm:gap-4">
 
@@ -265,7 +267,7 @@ export default function Navbar() {
                         >
                             <div className="bg-white p-0.5 rounded-full shadow-sm border border-gray-100 w-8 h-8 flex items-center justify-center overflow-hidden">
                                 {avatarUrl ? (
-                                    <img src={avatarUrl} alt="Avatar" className="w-full h-full object-cover rounded-full" />
+                                    <img src={avatarUrl} alt="Avatar" className="w-full h-full object-cover rounded-full" referrerPolicy="no-referrer" />
                                 ) : (
                                     <User className="w-5 h-5 text-gray-600" />
                                 )}

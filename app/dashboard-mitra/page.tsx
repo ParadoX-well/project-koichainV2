@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import { useWallet } from '@/context/WalletContext';
 import { supabase } from '@/lib/supabase';
 import { useRouter } from 'next/navigation';
-import { Database, Send, Activity, ShieldAlert, Wallet, ArrowRight, Ban, Baby, BookOpen, Compass, Store, Newspaper, MessageSquare } from 'lucide-react';
+import { Database, Send, Activity, ShieldAlert, Wallet, ArrowRight, Ban, Baby, BookOpen, Compass, Store, Newspaper, MessageSquare, MapPin } from 'lucide-react';
 import Link from 'next/link';
 import Navbar from "@/components/Navbar";
 import { Toaster } from 'react-hot-toast';
@@ -285,6 +285,23 @@ export default function MitraDashboard() {
               <p className="text-gray-500 mb-8 leading-relaxed flex-grow">Jelajahi daftar seluruh mitra (Breeder & Seller) resmi yang terdaftar di KoiChain.</p>
               <div className="flex items-center text-indigo-600 font-bold text-sm group-hover:translate-x-2 transition mt-auto">
                 Lihat Mitra <ArrowRight size={18} className="ml-2" />
+              </div>
+            </div>
+          </Link>
+
+          {/* MENU: PETA MITRA */}
+          <Link href="/maps" className="relative group bg-white/80 backdrop-blur-xl p-8 rounded-[2rem] border border-white shadow-xl hover:-translate-y-2 hover:shadow-2xl transition-all duration-500 overflow-hidden flex flex-col h-full">
+            <div className="absolute inset-0 bg-gradient-to-br from-amber-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
+            <div className="absolute -right-10 -top-10 w-40 h-40 bg-amber-100 rounded-full blur-3xl opacity-50 group-hover:bg-amber-200 transition"></div>
+
+            <div className="relative z-10 flex flex-col h-full">
+              <div className="w-16 h-16 bg-gradient-to-br from-amber-100 to-amber-200 rounded-2xl flex items-center justify-center mb-6 shadow-inner group-hover:scale-110 transition-transform duration-500">
+                <MapPin className="text-amber-600 w-8 h-8" />
+              </div>
+              <h3 className="text-2xl font-black text-gray-900 mb-3">Peta Mitra</h3>
+              <p className="text-gray-500 mb-8 leading-relaxed flex-grow">Temukan toko dan farm ikan koi terdekat yang telah terverifikasi resmi secara interaktif.</p>
+              <div className="flex items-center text-amber-600 font-bold text-sm group-hover:translate-x-2 transition mt-auto">
+                Buka Peta <ArrowRight size={18} className="ml-2" />
               </div>
             </div>
           </Link>
